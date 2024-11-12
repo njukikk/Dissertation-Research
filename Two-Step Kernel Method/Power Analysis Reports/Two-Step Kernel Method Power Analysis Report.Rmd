@@ -1,0 +1,470 @@
+---
+header-includes: 
+  - \usepackage{setspace}
+  - \singlespacing
+  - \usepackage{titling}
+  - \setlength{\droptitle}{-7em} 
+  - \usepackage{titlesec}
+  - \titlespacing{\title}{0pt}{\parskip}{-\parskip}
+title: 'Two-Step Kernel Method Power Analysis (Dist1=Hamming or Jaccard, Dist2=Aitchison): 20 Cell Types with 4 Rare Cell Types'
+date: "`r Sys.Date()`"
+subtitle: |
+          | Kelvin Njuki
+fontsize: 11pt
+output:
+  pdf_document:
+    number_sections: yes
+    extra_dependencies: ["float"]
+    fig_caption: true
+  html_document:
+    df_print: paged
+  word_document: default
+#classoption: landscape
+#bibliography: References.bib
+link-citations: yes
+urlcolor: blue
+---
+<!-- \vspace{-22truemm} -->
+
+<!-- \tableofcontents -->
+
+<!-- \newpage -->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(bookdown)
+library(readxl)
+library(knitr)
+library(xtable)
+library(tidyverse)
+library(patchwork)
+library(gridExtra)
+library(cowplot)
+library(float)
+library(ggplot2)
+library(ggpubr)
+```
+
+
+## Zero Imputation Method vs Two-Step Kernel Method (Dist1 = Hamming, Dist 2 = Aitchison) for 20 Cell Types with 4 Rare Cell Types.
+
+
+```{r results='hide', include=TRUE, echo=FALSE, warning=FALSE, fig.align='center', fig.pos="H", fig.height = 6, fig.width = 10, fig.cap="Type I error and power plots for zero-imputation method and two-step kernel method (Dist1 = Hamming, Dist 2 = Aitchison). Maxeffects used were: case 2 = 0.002, case 3 = 0.0015 and case 4 = 0.003"}
+# Set working directory
+setwd("D:/A.School/OSU/Class/1. Dissertation/6. Fall 2024/Simulations/Two-Step Kernel Method/Dist1 = Hamming, Dist2 = Aitchison/20 ps 4 small ps")
+
+#Type I Error plot
+case1_20props_4small_2step_vs_0imputation_initeffsize <- read.csv("case1_20props_4small_2step_vs_0imputation_initeffsize.csv")
+
+case1_powerplot <- ggplot(data = case1_20props_4small_2step_vs_0imputation_initeffsize) +
+  geom_line(aes(x=alphavec, y=powervec.zero.imputed.case1, color="blue")) +
+  geom_line(aes(x=alphavec, y=powervec.two.step.case1, color="red")) +
+  geom_line(aes(x=alphavec, y=alphavec), linetype = "dashed") +
+  labs(x="Alpha level (log-10 scale)", y="Power", color="Method", title = "Case 1: No difference") +
+  scale_color_manual(labels = c("Zero Imputation", "Two-Step"), 
+                     values = c("blue", "red")) +
+  scale_x_log10(labels = as.numeric(c("0", "5e-04", "1e-03", "2e-03", "5e-03", "1e-02", "2e-02", "5e-02")),
+                     breaks = as.numeric(c(0, 5e-04, 1e-03, 2e-03, 5e-03, 1e-02, 2e-02, 5e-02))) +
+  theme_bw() + #ylim(0, 0.1) + 
+  theme(legend.position = c(0.2, 0.8),
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 10),
+        line = element_line(size=1),
+        plot.title = element_text(hjust = 0.5, size = 10),
+        plot.subtitle = element_text(hjust = 0.5, size = 10),
+        plot.caption=element_text(hjust=0.5),
+        panel.border = element_rect(size=0.2, fill = NA),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.text.x = element_text(angle = 0, size = 10),
+        axis.text.y = element_text(size = 10),
+        axis.title = element_text(size = 10),
+        axis.ticks = element_line(size=0.2),
+        strip.text = element_text(size = 10),
+        strip.text.x = element_text(angle = 0))
+
+ggsave(case1_powerplot, file = paste0("case1_20props_4small_2step_vs_0imputation_initeffsize.png"),
+       width = 7.29, height = 4.5)
+
+
+### Case 2: Power verses Aitchson distance for zero-imputation method and two-step kernel method
+case2_20props_4small_2step_vs_0imputation_initeffsize <- read.csv("case2_20props_4small_2step_vs_0imputation_initeffsize.csv")
+
+case2_powerplot <- ggplot(data = case2_20props_4small_2step_vs_0imputation_initeffsize) +
+  geom_point(aes(x=ds.pseudo.case2, y=powervec.zero.imputed.case2, color="blue")) +
+  geom_point(aes(x=ds.pseudo.case2, y=powervec.two.step.case2, color="red")) +
+  labs(title = "Case 2: Small difference in all (20) cell types", x="Aitchson Distance", 
+       y="Power", color="Method", ) +
+  scale_color_manual(labels = c("Zero Imputation", "Two-Step"), 
+                     values = c("blue", "red")) +
+  theme_bw() + ylim(0, 1) + 
+  theme(legend.position = "none", #c(0.2, 0.8),
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 10),
+        line = element_line(size=1),
+        plot.title = element_text(hjust = 0.5, size = 10),
+        plot.subtitle = element_text(hjust = 0.5, size = 10),
+        plot.caption=element_text(hjust=0.5),
+        panel.border = element_rect(size=0.2, fill = NA),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.text.x = element_text(angle = 0, size = 10),
+        axis.text.y = element_text(size = 10),
+        axis.title = element_text(size = 10),
+        axis.ticks = element_line(size=0.2),
+        strip.text = element_text(size = 10),
+        strip.text.x = element_text(angle = 0))
+
+ggsave(case2_powerplot,file = paste0("case2_20props_4small_2step_vs_0imputation_initeffsize.png"),
+       width = 7.29, height = 4.5)
+
+
+### Case 3: Power verses Aitchson distance for zero-imputation method and two-step kernel method
+case3_20props_4small_2step_vs_0imputation_initeffsize <- read.csv("case3_20props_4small_2step_vs_0imputation_initeffsize.csv")
+
+case3_powerplot <- ggplot(data = case3_20props_4small_2step_vs_0imputation_initeffsize) +
+  geom_point(aes(x=ds.pseudo.case3, y=powervec.zero.imputed.case3, color="blue")) +
+  geom_point(aes(x=ds.pseudo.case3, y=powervec.two.step.case3, color="red")) +
+  labs(title = "Case 3: Small difference in some (10) cell types", x="Aitchson Distance", 
+       y="Power", color="Method", ) +
+ scale_color_manual(labels = c("Zero Imputation", "Two-Step"), 
+                     values = c("blue", "red")) +
+  theme_bw() + ylim(0, 1) + 
+  theme(legend.position = "bottom", #c(0.2, 0.8),
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 10),
+        line = element_line(size=1),
+        plot.title = element_text(hjust = 0.5, size = 10),
+        plot.subtitle = element_text(hjust = 0.5, size = 10),
+        plot.caption=element_text(hjust=0.5),
+        panel.border = element_rect(size=0.2, fill = NA),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.text.x = element_text(angle = 0, size = 10),
+        axis.text.y = element_text(size = 10),
+        axis.title = element_text(size = 10),
+        axis.ticks = element_line(size=0.2),
+        strip.text = element_text(size = 10),
+        strip.text.x = element_text(angle = 0))
+
+ggsave(case3_powerplot,file = paste0("case3_20props_4small_2step_vs_0imputation_initeffsize.png"),
+       width = 7.29, height = 4.5)
+
+
+### Case 4: Power verses Aitchson distance for zero-imputation method and two-step kernel method
+case4_20props_4small_2step_vs_0imputation_initeffsize <- read.csv("case4_20props_4small_2step_vs_0imputation_initeffsize.csv")
+
+case4_powerplot <- ggplot(data = case4_20props_4small_2step_vs_0imputation_initeffsize) +
+  geom_point(aes(x=ds.pseudo.case4, y=powervec.zero.imputed.case4, color="blue")) +
+  geom_point(aes(x=ds.pseudo.case4, y=powervec.two.step.case4, color="red")) +
+  labs(title = "Case 4: Large difference in a few (5) cell types", x="Aitchson Distance", 
+       y="Power", color="Method", ) +
+ scale_color_manual(labels = c("Zero Imputation", "Two-Step"), 
+                     values = c("blue", "red")) +
+  theme_bw() + ylim(0, 1) + 
+  theme(legend.position = "bottom", #c(0.2, 0.8),
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 10),
+        line = element_line(size=1),
+        plot.title = element_text(hjust = 0.5, size = 10),
+        plot.subtitle = element_text(hjust = 0.5, size = 10),
+        plot.caption=element_text(hjust=0.5),
+        panel.border = element_rect(size=0.2, fill = NA),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.text.x = element_text(angle = 0, size = 10),
+        axis.text.y = element_text(size = 10),
+        axis.title = element_text(size = 10),
+        axis.ticks = element_line(size=0.2),
+        strip.text = element_text(size = 10),
+        strip.text.x = element_text(angle = 0))
+
+ggsave(case4_powerplot,file = paste0("case4_20props_4small_2step_vs_0imputation_initeffsize.png"),
+       width = 7.29, height = 4.5)
+
+
+### All Cases Combined: Power verses Aitchson distance for zero-imputation method and two-step kernel method
+all3cases_20props_4small_2step_vs_0imputation_initeffsize <- read.csv("all3cases_20props_4small_2step_vs_0imputation_initeffsize.csv")
+
+#Plotting power verses Aitchson distance for all cases combined
+all3cases_powerplot <- ggplot(data = all3cases_20props_4small_2step_vs_0imputation_initeffsize) +
+  geom_point(aes(x=ds.pseudo, y=powervec.zero.imputed.3cases, color="blue")) +
+  geom_point(aes(x=ds.pseudo, y=powervec.two.step.3cases, color="red")) +
+  labs(title = "Cases 1, 2 & 3 Combined", x="Aitchson Distance", y="Power", color="Method") +
+  scale_color_manual(labels = c("Zero Imputation", "Two-Step"), 
+                     values = c("blue", "red")) +
+  theme_bw() + ylim(0, 1) + 
+  theme(legend.position = "bottom",
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 10),
+        line = element_line(size=1),
+        plot.title = element_text(hjust = 0.5, size = 10),
+        plot.subtitle = element_text(hjust = 0.5, size = 10),
+        plot.caption=element_text(hjust=0.5),
+        panel.border = element_rect(size=0.2, fill = NA),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.text.x = element_text(angle = 0, size = 10),
+        axis.text.y = element_text(size = 10),
+        axis.title = element_text(size = 10),
+        axis.ticks = element_line(size=0.2),
+        strip.text = element_text(size = 10),
+        strip.text.x = element_text(angle = 0))
+
+ggsave(all3cases_powerplot,file = paste0("all3cases_20props_4small_2step_vs_0imputation_initeffsize.png"),
+       width = 7.29, height = 4.5)
+
+#grid.arrange(case1_powerplot, case2_powerplot, case3_powerplot, case4_powerplot, ncol=2)
+ggarrange(case1_powerplot, case2_powerplot, case3_powerplot, case4_powerplot, ncol=2, nrow = 2)
+
+# # arrange the plots in a grid with 3 columns
+# combined_plot <- ggarrange(plotlist = c(case1_powerplot, case2_powerplot, case3_powerplot, case4_powerplot),
+#                            ncol = 2, common.legend = TRUE, legend = "bottom")
+# 
+# # Annotate the figure with a common title
+# annotate_figure(combined_plot,
+#                 top = text_grob("CODAK Performance Before and After Radial Transformation; Low Zero Inflated Data",
+#                                 face = "bold", size = 11))
+```
+
+
+```{r results='hide', include=TRUE, echo=FALSE, warning=FALSE, fig.align='center', fig.pos="H", fig.height = 6, fig.width = 10, fig.cap="Power plot for all 3 cases for zero-imputation method and two-step kernel method (Dist1 = Hamming, Dist 2 = Aitchison). Maxeffects used were: case 2 = 0.002, case 3 = 0.0015 and case 4 = 0.003"}
+
+ggarrange(all3cases_powerplot, ncol=1, nrow = 1)
+```
+
+
+
+## Zero Imputation Method vs Two-Step Kernel Method (Dist1 = Jaccard, Dist 2 = Aitchison) for 20 Cell Types with 4 Rare Cell Types.
+
+
+```{r results='hide', include=TRUE, echo=FALSE, warning=FALSE, fig.align='center', fig.pos="H", fig.height = 6, fig.width = 10, fig.cap="Type I error and power plots for zero-imputation method and two-step kernel method (Dist1 = Jaccard, Dist 2 = Aitchison). Maxeffects used were: case 2 = 0.002, case 3 = 0.0015 and case 4 = 0.003"}
+
+# Set working directory
+setwd("D:/A.School/OSU/Class/1. Dissertation/6. Fall 2024/Simulations/Two-Step Kernel Method/Dist1 = Jaccard, Dist2 = Aitchison/20 ps 4 small ps")
+
+#Type I Error plot
+case1_20props_4small_2step_vs_0imputation_initeffsize <- read.csv("case1_20props_4small_2step_vs_0imputation_initeffsize.csv")
+
+case1_powerplot <- ggplot(data = case1_20props_4small_2step_vs_0imputation_initeffsize) +
+  geom_line(aes(x=alphavec, y=powervec.zero.imputed.case1, color="blue")) +
+  geom_line(aes(x=alphavec, y=powervec.two.step.case1, color="red")) +
+  geom_line(aes(x=alphavec, y=alphavec), linetype = "dashed") +
+  labs(x="Alpha level (log-10 scale)", y="Power", color="Method", title = "Case 1: No difference") +
+  scale_color_manual(labels = c("Zero Imputation", "Two-Step"), 
+                     values = c("blue", "red")) +
+  scale_x_log10(labels = as.numeric(c("0", "5e-04", "1e-03", "2e-03", "5e-03", "1e-02", "2e-02", "5e-02")),
+                     breaks = as.numeric(c(0, 5e-04, 1e-03, 2e-03, 5e-03, 1e-02, 2e-02, 5e-02))) +
+  theme_bw() + #ylim(0, 0.1) + 
+  theme(legend.position = c(0.2, 0.8),
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 10),
+        line = element_line(size=1),
+        plot.title = element_text(hjust = 0.5, size = 10),
+        plot.subtitle = element_text(hjust = 0.5, size = 10),
+        plot.caption=element_text(hjust=0.5),
+        panel.border = element_rect(size=0.2, fill = NA),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.text.x = element_text(angle = 0, size = 10),
+        axis.text.y = element_text(size = 10),
+        axis.title = element_text(size = 10),
+        axis.ticks = element_line(size=0.2),
+        strip.text = element_text(size = 10),
+        strip.text.x = element_text(angle = 0))
+
+ggsave(case1_powerplot, file = paste0("case1_20props_4small_2step_vs_0imputation_initeffsize.png"),
+       width = 7.29, height = 4.5)
+
+
+### Case 2: Power verses Aitchson distance for zero-imputation method and two-step kernel method
+case2_20props_4small_2step_vs_0imputation_initeffsize <- read.csv("case2_20props_4small_2step_vs_0imputation_initeffsize.csv")
+
+case2_powerplot <- ggplot(data = case2_20props_4small_2step_vs_0imputation_initeffsize) +
+  geom_point(aes(x=ds.pseudo.case2, y=powervec.zero.imputed.case2, color="blue")) +
+  geom_point(aes(x=ds.pseudo.case2, y=powervec.two.step.case2, color="red")) +
+  labs(title = "Case 2: Small difference in all (20) cell types", x="Aitchson Distance", 
+       y="Power", color="Method", ) +
+  scale_color_manual(labels = c("Zero Imputation", "Two-Step"), 
+                     values = c("blue", "red")) +
+  theme_bw() + ylim(0, 1) + 
+  theme(legend.position = "none", #c(0.2, 0.8),
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 10),
+        line = element_line(size=1),
+        plot.title = element_text(hjust = 0.5, size = 10),
+        plot.subtitle = element_text(hjust = 0.5, size = 10),
+        plot.caption=element_text(hjust=0.5),
+        panel.border = element_rect(size=0.2, fill = NA),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.text.x = element_text(angle = 0, size = 10),
+        axis.text.y = element_text(size = 10),
+        axis.title = element_text(size = 10),
+        axis.ticks = element_line(size=0.2),
+        strip.text = element_text(size = 10),
+        strip.text.x = element_text(angle = 0))
+
+ggsave(case2_powerplot,file = paste0("case2_20props_4small_2step_vs_0imputation_initeffsize.png"),
+       width = 7.29, height = 4.5)
+
+
+### Case 3: Power verses Aitchson distance for zero-imputation method and two-step kernel method
+case3_20props_4small_2step_vs_0imputation_initeffsize <- read.csv("case3_20props_4small_2step_vs_0imputation_initeffsize.csv")
+
+case3_powerplot <- ggplot(data = case3_20props_4small_2step_vs_0imputation_initeffsize) +
+  geom_point(aes(x=ds.pseudo.case3, y=powervec.zero.imputed.case3, color="blue")) +
+  geom_point(aes(x=ds.pseudo.case3, y=powervec.two.step.case3, color="red")) +
+  labs(title = "Case 3: Small difference in some (10) cell types", x="Aitchson Distance", 
+       y="Power", color="Method", ) +
+ scale_color_manual(labels = c("Zero Imputation", "Two-Step"), 
+                     values = c("blue", "red")) +
+  theme_bw() + ylim(0, 1) + 
+  theme(legend.position = "bottom", #c(0.2, 0.8),
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 10),
+        line = element_line(size=1),
+        plot.title = element_text(hjust = 0.5, size = 10),
+        plot.subtitle = element_text(hjust = 0.5, size = 10),
+        plot.caption=element_text(hjust=0.5),
+        panel.border = element_rect(size=0.2, fill = NA),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.text.x = element_text(angle = 0, size = 10),
+        axis.text.y = element_text(size = 10),
+        axis.title = element_text(size = 10),
+        axis.ticks = element_line(size=0.2),
+        strip.text = element_text(size = 10),
+        strip.text.x = element_text(angle = 0))
+
+ggsave(case3_powerplot,file = paste0("case3_20props_4small_2step_vs_0imputation_initeffsize.png"),
+       width = 7.29, height = 4.5)
+
+
+### Case 4: Power verses Aitchson distance for zero-imputation method and two-step kernel method
+case4_20props_4small_2step_vs_0imputation_initeffsize <- read.csv("case4_20props_4small_2step_vs_0imputation_initeffsize.csv")
+
+case4_powerplot <- ggplot(data = case4_20props_4small_2step_vs_0imputation_initeffsize) +
+  geom_point(aes(x=ds.pseudo.case4, y=powervec.zero.imputed.case4, color="blue")) +
+  geom_point(aes(x=ds.pseudo.case4, y=powervec.two.step.case4, color="red")) +
+  labs(title = "Case 4: Large difference in a few (5) cell types", x="Aitchson Distance", 
+       y="Power", color="Method", ) +
+ scale_color_manual(labels = c("Zero Imputation", "Two-Step"), 
+                     values = c("blue", "red")) +
+  theme_bw() + ylim(0, 1) + 
+  theme(legend.position = "bottom", #c(0.2, 0.8),
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 10),
+        line = element_line(size=1),
+        plot.title = element_text(hjust = 0.5, size = 10),
+        plot.subtitle = element_text(hjust = 0.5, size = 10),
+        plot.caption=element_text(hjust=0.5),
+        panel.border = element_rect(size=0.2, fill = NA),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.text.x = element_text(angle = 0, size = 10),
+        axis.text.y = element_text(size = 10),
+        axis.title = element_text(size = 10),
+        axis.ticks = element_line(size=0.2),
+        strip.text = element_text(size = 10),
+        strip.text.x = element_text(angle = 0))
+
+ggsave(case4_powerplot,file = paste0("case4_20props_4small_2step_vs_0imputation_initeffsize.png"),
+       width = 7.29, height = 4.5)
+
+
+### All Cases Combined: Power verses Aitchson distance for zero-imputation method and two-step kernel method
+all3cases_20props_4small_2step_vs_0imputation_initeffsize <- read.csv("all3cases_20props_4small_2step_vs_0imputation_initeffsize.csv")
+
+#Plotting power verses Aitchson distance for all cases combined
+all3cases_powerplot <- ggplot(data = all3cases_20props_4small_2step_vs_0imputation_initeffsize) +
+  geom_point(aes(x=ds.pseudo, y=powervec.zero.imputed.3cases, color="blue")) +
+  geom_point(aes(x=ds.pseudo, y=powervec.two.step.3cases, color="red")) +
+  labs(title = "Cases 1, 2 & 3 Combined", x="Aitchson Distance", y="Power", color="Method") +
+  scale_color_manual(labels = c("Zero Imputation", "Two-Step"), 
+                     values = c("blue", "red")) +
+  theme_bw() + ylim(0, 1) + 
+  theme(legend.position = "bottom",
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 10),
+        line = element_line(size=1),
+        plot.title = element_text(hjust = 0.5, size = 10),
+        plot.subtitle = element_text(hjust = 0.5, size = 10),
+        plot.caption=element_text(hjust=0.5),
+        panel.border = element_rect(size=0.2, fill = NA),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.text.x = element_text(angle = 0, size = 10),
+        axis.text.y = element_text(size = 10),
+        axis.title = element_text(size = 10),
+        axis.ticks = element_line(size=0.2),
+        strip.text = element_text(size = 10),
+        strip.text.x = element_text(angle = 0))
+
+ggsave(all3cases_powerplot,file = paste0("all3cases_20props_4small_2step_vs_0imputation_initeffsize.png"),
+       width = 7.29, height = 4.5)
+
+#grid.arrange(case1_powerplot, case2_powerplot, case3_powerplot, case4_powerplot, ncol=2)
+ggarrange(case1_powerplot, case2_powerplot, case3_powerplot, case4_powerplot, ncol=2, nrow = 2)
+
+# # arrange the plots in a grid with 3 columns
+# combined_plot <- ggarrange(plotlist = c(case1_powerplot, case2_powerplot, case3_powerplot, case4_powerplot),
+#                            ncol = 2, common.legend = TRUE, legend = "bottom")
+# 
+# # Annotate the figure with a common title
+# annotate_figure(combined_plot,
+#                 top = text_grob("CODAK Performance Before and After Radial Transformation; Low Zero Inflated Data",
+#                                 face = "bold", size = 11))
+```
+
+
+```{r results='hide', include=TRUE, echo=FALSE, warning=FALSE, fig.align='center', fig.pos="H", fig.height = 6, fig.width = 10, fig.cap="Power plot for all 3 cases for zero-imputation method and two-step kernel method (Dist1 = Jaccard, Dist 2 = Aitchison). Maxeffects used were: case 2 = 0.002, case 3 = 0.0015 and case 4 = 0.003"}
+
+ggarrange(all3cases_powerplot, ncol=1, nrow = 1)
+
+# # Load necessary libraries
+# library(ggplot2)
+# library(reshape2)
+# 
+# # Load the data (replace the file path as necessary)
+# data <- read.csv("D:/A.School/OSU/Class/1. Dissertation/6. Fall 2024/Simulations/Two-Step Kernel Method/Dist1 = Jaccard, Dist2 = Aitchison/20 ps 4 small ps/Boxplots or Dotplots.csv")
+# 
+# # Reshape data to long format for ggplot
+# data_long <- pivot_longer(data, cols = everything(), names_to = "variable", values_to = "value")
+# data_long$row_id <- rep(1:nrow(data), each = 2)
+# 
+# # Calculate center points for each row
+# center_positions <- data_long %>%
+#   group_by(row_id) %>%
+#   summarise(center = mean(value))
+# 
+# # Create plot with horizontal lines and centered points
+# ggplot(data_long, aes(x = value, y = factor(row_id), color = variable)) +
+#   geom_segment(aes(x = min(value), xend = max(value), yend = factor(row_id)), size = 0.5) + # Line for each row
+#   geom_point(data = center_positions, aes(x = center, y = factor(row_id)), color = "black", size = 2) + # Center points
+#   labs(x = "Value", y = "Row", title = "Centered Point on Horizontal Line for Each Row") +
+#   theme_minimal() +
+#   theme(axis.text.y = element_text(angle = 90, vjust = 0.5))
+```
+
